@@ -73,6 +73,74 @@ Functions:
     use few parameters
 
 
+#####################################################
+
 TDD
+
+Why 'guided' test?
+
+# Chapter 1
+acceptance test
+unit test
+
+end to end: I dont use it: Deployment test from the start maybe?
+  without calling directly its internal code
+   (I assume that mocks everything? tests the user interface concept)
+
+
+whole cycle: 
+golden rule: never write a new functionality without a failing test
+
+Automated build
+  check last version
+  compile test code
+  integrate and package the system
+  exercise the system through its external access points
+
+Levels
+  - acceptance
+  - Integration
+  - Unit
+
+
+External and internal quality
+ why a test may be difficult to write. 
+  Listen to tests
+
+
+## Chapter 4
+Deploying and testing from the start: forces to understand how the system fits into the real world. Flushes out the 'unknown unknown'
+  Problem of testing the first feature (first-feature paradox):
+    a) Work out how to build, deploy and test a 'walking skeleton'
+    b) Then test write acceptance tests for the first meaningful feature. 
+' Walking skeleton' : implementation of the thinest possible slice of real funcitionality that we can automatically build, deploy, and test ent-to-end
+
+design the walink skeleton: been able to draw it on the board in few minutes
+
+Understanding of th purpuse of the system
+Build sources of feedback: releases regularly  to a real production system
+   Here: the automated deployment
+
+### Expose uncertainty earlier:
+  involves asking a lot of awkward questions
+  Frontloads the stress of the project
+ Limit to the white board level discussions
+
+## Cahpter 5
+
+### start each feature with an acceptance test
+
+We write the acceptance test using only terminology from the application (not bd or web service). Independent of underlying technologies
+Clarify what we want to achieve
+
+Acceptance tests: Helps us to understand the user' perspective
+Unit test: exercise objects, small clusters of objects, in isolation. They don't say anithing about whether they work together wiht the rest of the system
+
+New acceptance tests
+
+
+
+
+
     unit tests
     regression tests
