@@ -1,5 +1,6 @@
 import utils
 from collections import OrderedDict
+from sklearn.metrics import mean_squared_error, mean_absolute_error
 
 import numpy as np
 
@@ -9,18 +10,17 @@ from utils.modelling import CVFitter
 target_name = 'SalePrice'
 
 
-def eval_model_on_cv(df, log_file):
+def eval_model_on_cv(df, log_file, extra_model_params={}):
     df = clean_data(df)
     df = add_features(df)
     mm, targets = get_mm(df), get_targets(df)
     ixs = get_cv_ixs(df)
-    model = get_model(n_jobs=10, n_estimators=9999)
+    model = get_model(n_jobs=10, n_estimators=1, **extra_model_params)
     fitter = CVFitter(model)
     results = fitter.fit(mm, targets, ixs, early_stopping_rounds=50)
     preds = results['combined_preds']
-    val_ixs = get_val_ixs(ixs)
-    evals = evaluate_losses(preds, df[val_ixs])
-    utils.io.append_csv(log_file)
+    evals = evaluate_preds(preds, df)
+    utils.io.append_csv(evals, log_file)
 
 
 def clean_data(df):
@@ -64,8 +64,17 @@ def get_model(**kwargs):
             'n_jobs': 10,
             'max_depth': 20
             }
+    params.update(kwargs)
     model = utils.models.LGBRModel(params)
     return model
+
+
+def evaluate_preds(preds, df):
+    evals = {
+            'mse': mean_squared_error(df[target_name], preds),
+            'mae': mean_absolute_error(df[target_name], preds)
+            }
+    return evals
 
 
 if __name__ == '__main__':

@@ -16,10 +16,12 @@ df = DDF({
 
 def test_eval_model_on_cv(tmpdir):
     df = load_df(TRAIN_PATH, nrows=10)
-    ev.eval_model_on_cv(df=df, log_file=tmpdir)
-    results_df = DDF.from_csv(tmpdir)
-    assert len(tmpdir) == 1
-    assert np.isclose(results_df['rmse'][0] == 10)
+    model_params = {'min_data': 1, 'min_data_in_bin': 1}
+    log_path = str(tmpdir) + 'file.csv'
+    ev.eval_model_on_cv(df=df, log_file=log_path, extra_model_params=model_params)
+    results_df = DDF.from_csv(log_path)
+    assert len(results_df) == 1
+    assert results_df['mse'][0] == 3126912000.0
 
 
 def test_clean_data():
@@ -56,7 +58,8 @@ def test_get_cv_ixs():
         assert np.all(ixs[fold]['val'] == expected_ixs[fold]['val'])
 
 
-
-
-
-
+def test_evaluate_preds():
+    preds = np.array([1000, 20000, 400000])
+    result = ev.evaluate_preds(preds, df)
+    for metric in result:
+        assert result[metric] == 0
