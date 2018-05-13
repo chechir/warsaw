@@ -1,0 +1,132 @@
+- make repo: housePrice folder, add __init__.py file
+- create folder tests
+
+initial idea: evaluate model in CV
+
+######### MAKE A FUNCTIONAL FAILING TEST
+- create test file: tests/test_pipelines.py
+- create test: def test_eval_model()
+
+df = DDF({  # define df as global because we will use it again
+    'MSZoning': ['FV', 'RH', 'RM'],
+    'MiscFeature': [np.nan, 'Gar2', 'Othr'],
+    'MoSold': [2, 5, 9]
+    })
+
+
+def test_eval_model_on_cv(tmpdir):
+    df = load_df(TRAIN_PATH)
+    ev.eval_model_on_cv(df=df, log_file=tmpdir)
+    results_df = DDF.from_csv(tmpdir)
+    assert len(tmpdir) == 1
+    assert np.isclose(results_df['rmse'][0] == 10)
+
+- run tests and it will fail
+- cannot import data, fix it, create load_df and TRAIN_PATH
+
+TRAIN_PATH = os.path.join(utils.paths.dropbox(), 'HousePricesData/train.csv')
+def load_df(data_path, nrows=None):
+    return DDF.from_csv(data_path, nrows=nrows)
+
+######### MAKE THE TEST PASS
+
+- create file: eval_model.py
+- create function: eval_model_on_cv
+   s: abstraction levels, general steps
+
+def eval_model_on_cv(df, log_file):
+    df = clean_data(df)
+    df = add_features(df)
+    mm, targets = get_mm(df), get_targets(df)
+    ixs = get_cv_ixs(df)
+    model = get_model(n_jobs=10, n_estimators=9999)
+    fitter = CVFitter(model)
+    results = fitter.fit(mm, targets, ixs, early_stopping_rounds=50)
+    preds = results['combined_preds']
+    val_ixs = get_val_ixs(ixs)
+    evals = evaluate_losses(preds, df[val_ixs])
+    io.append_csv(log_file)
+
+
+We need to build a bunch of functions
+
+####### Write a failing test (unit test)
+test_clean_data()
+def test_clean_data():
+    result_df = ev.clean_data(df)
+    assert result_df['MSZoning'].dtype == float
+    assert np.all(df['MoSold'] == result_df['MoSold'])
+
+
+####### Make the test pass               clean_data
+def clean_data(df):
+    str_columns = utils.np.get_str_columns(df)
+    for col in str_columns:
+        df[col] = utils.features.categorical_to_numeric(df, col)
+    for col in df.columns:
+        df[col] = utils.np.fillna(df[col], -99)
+    return df
+
+
+####### Write a failing test (unit test)  add_features
+def test_add_features():
+    result_df = ev.add_features(df)
+    assert 'f:MoSold**2' in result_df
+
+
+####### Make the test pass
+def add_features(df):
+    df['f:MoSold**2'] = df['MoSold'] ** 2
+    return df
+
+
+####### Write a failing test (unit test)  get_mm and get_targets
+def test_get_mm():
+    result_df = ev.get_mm(df)
+    assert 'SalesPrice' not in result_df.columns
+
+
+def test_get_targets():
+    result = ev.get_targets(df)
+    assert np.allclose(result, np.array([1000, 20000, 400000]))
+
+
+####### Make the test pass
+add target_name
+def get_mm(df):
+    columns_to_drop = [target_name]
+    mm_cols = [col for col in df.columns if col not in columns_to_drop]
+    return df.colslice(mm_cols)
+
+
+def get_targets(df):
+    return df[target_name]
+
+
+####### Write a failing test (unit test)  add_features
+def test_get_cv_ixs():
+    ixs = ev.get_cv_ixs(df)
+    expected_ixs = {
+            0: {'train': np.array([True, True, False]),
+                'val': np.array([False, False, True])},
+            1: {'train': np.array([False, False, True]),
+                'val': np.array([True, True, False])}
+            }
+    for fold in expected_ixs:
+        assert np.all(ixs[fold]['train'] == expected_ixs[fold]['train'])
+        assert np.all(ixs[fold]['val'] == expected_ixs[fold]['val'])
+
+
+####### Make the test pass
+def get_cv_ixs(df, split_ratio=0.5):
+    order = np.arange(len(df))
+    split_point = round(len(df) * split_ratio, 0) - 1
+    train_ixs = order <= split_point
+    result = OrderedDict({
+        0: {'train': train_ixs, 'val': ~train_ixs},
+        1: {'train': ~train_ixs, 'val': train_ixs}
+        })
+    return result
+
+
+get_model: here we need to change something

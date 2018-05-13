@@ -34,7 +34,7 @@ def clean_text(text):
             }
     for pattern, replace_value in replaces.iteritems():
         result = re.sub(pattern, replace_value, result)
-    pass
+    return result
 
 
 def remove_stop_words():

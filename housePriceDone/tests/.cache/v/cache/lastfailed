@@ -1,0 +1,4 @@
+{
+  "test_pipelines.py::test_eval_model_on_cv": true, 
+  "test_pipelines.py::test_get_cv_ixs": true
+}
