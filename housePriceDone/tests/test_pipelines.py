@@ -21,7 +21,7 @@ def test_eval_model_on_cv(tmpdir):
     ev.eval_model_on_cv(df=df, log_file=log_path, extra_model_params=model_params)
     results_df = DDF.from_csv(log_path)
     assert len(results_df) == 1
-    assert results_df['mse'][0] == 3126912000.0
+    assert np.isclose(results_df['mse'][0], 55918.798270300009)
 
 
 def test_clean_data():

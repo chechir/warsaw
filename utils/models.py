@@ -15,7 +15,6 @@ class LGBRModel():
                                    kwargs['early_stopping_data']['targets']
                                    )]
             kwargs.pop('early_stopping_data')
-
         self.mm_columns = mm.columns
         self._model.fit(mm.values, targets, *args, **kwargs)
 

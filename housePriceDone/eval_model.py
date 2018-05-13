@@ -15,12 +15,20 @@ def eval_model_on_cv(df, log_file, extra_model_params={}):
     df = add_features(df)
     mm, targets = get_mm(df), get_targets(df)
     ixs = get_cv_ixs(df)
-    model = get_model(n_jobs=10, n_estimators=1, **extra_model_params)
+    params = {
+            'learning_rate': 0.01,
+            'n_estimators': 9999,
+            'n_jobs': 10
+            }
+    params.update(extra_model_params)
+    model = get_model(**params)
     fitter = CVFitter(model)
     results = fitter.fit(mm, targets, ixs, early_stopping_rounds=50)
     preds = results['combined_preds']
-    evals = evaluate_preds(preds, df)
+    evals = evaluate_preds(preds, targets)
     utils.io.append_csv(evals, log_file)
+    import pdb;pdb.set_trace()
+    return evals
 
 
 def clean_data(df):
@@ -38,13 +46,13 @@ def add_features(df):
 
 
 def get_mm(df):
-    columns_to_drop = [target_name]
+    columns_to_drop = [target_name, 'Id', 'LotAreaCut']
     mm_cols = [col for col in df.columns if col not in columns_to_drop]
     return df.colslice(mm_cols)
 
 
 def get_targets(df):
-    return df[target_name]
+    return np.log(df[target_name])
 
 
 def get_cv_ixs(df, split_ratio=0.5):
@@ -69,15 +77,15 @@ def get_model(**kwargs):
     return model
 
 
-def evaluate_preds(preds, df):
+def evaluate_preds(preds, targets):
     evals = {
-            'mse': mean_squared_error(df[target_name], preds),
-            'mae': mean_absolute_error(df[target_name], preds)
+            'rmse': mean_squared_error(targets, preds) ** (1./2),
+            'mae': mean_absolute_error(targets, preds)
             }
     return evals
 
 
 if __name__ == '__main__':
     df = load_df(TRAIN_PATH)
-
-
+    log_file = utils.paths.dropbox() + '/log_cv_house_price.csv'
+    evals = eval_model_on_cv(df, log_file)

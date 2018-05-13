@@ -1,3 +1,5 @@
 {
-  "tests/test_pipelines.py::test_eval_model_on_cv": true
+  "tests/test_pipelines.py::test_eval_model_on_cv": true, 
+  "tests/test_pipelines.py::test_evaluate_preds": true, 
+  "tests/test_pipelines.py::test_get_targets": true
 }
