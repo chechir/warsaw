@@ -1,6 +1,6 @@
 import numpy as np
 
-from ddf import DDF
+from utils.ddf import DDF
 from housePriceDone import make_submission as ms
 
 
