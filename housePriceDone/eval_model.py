@@ -27,7 +27,6 @@ def eval_model_on_cv(df, log_file, extra_model_params={}):
     preds = results['combined_preds']
     evals = evaluate_preds(preds, targets)
     utils.io.append_csv(evals, log_file)
-    import pdb;pdb.set_trace()
     return evals
 
 
@@ -35,7 +34,7 @@ def clean_data(df):
     str_columns = utils.np.get_str_columns(df)
     for col in str_columns:
         df[col] = utils.features.categorical_to_numeric(df, col)
-    for col in df.columns:
+    for col in set(df.columns) - set([target_name]):
         df[col] = utils.np.fillna(df[col], -99)
     return df
 

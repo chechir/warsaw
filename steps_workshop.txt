@@ -15,11 +15,15 @@ df = DDF({  # define df as global because we will use it again
 
 
 def test_eval_model_on_cv(tmpdir):
-    df = load_df(TRAIN_PATH)
-    ev.eval_model_on_cv(df=df, log_file=tmpdir)
-    results_df = DDF.from_csv(tmpdir)
-    assert len(tmpdir) == 1
-    assert np.isclose(results_df['rmse'][0] == 10)
+    df = load_df(TRAIN_PATH, nrows=10)
+    model_params = {'min_data': 1, 'min_data_in_bin': 1}
+    log_path = str(tmpdir) + 'file.csv'
+    ev.eval_model_on_cv(
+            df=df, log_file=log_path,
+            extra_model_params=model_params)
+    results_df = DDF.from_csv(log_path)
+    assert len(results_df) == 1
+    assert np.isclose(results_df['mse'][0], 55918.798270300009)
 
 - run tests and it will fail
 - cannot import data, fix it, create load_df and TRAIN_PATH

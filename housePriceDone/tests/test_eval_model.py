@@ -18,10 +18,12 @@ def test_eval_model_on_cv(tmpdir):
     df = load_df(TRAIN_PATH, nrows=10)
     model_params = {'min_data': 1, 'min_data_in_bin': 1}
     log_path = str(tmpdir) + 'file.csv'
-    ev.eval_model_on_cv(df=df, log_file=log_path, extra_model_params=model_params)
+    ev.eval_model_on_cv(
+            df=df, log_file=log_path,
+            extra_model_params=model_params)
     results_df = DDF.from_csv(log_path)
     assert len(results_df) == 1
-    assert np.isclose(results_df['mse'][0], 55918.798270300009)
+    assert np.isclose(results_df['rmse'][0], 0.28874433)
 
 
 def test_clean_data():
@@ -42,7 +44,8 @@ def test_get_mm():
 
 def test_get_targets():
     result = ev.get_targets(df)
-    assert np.allclose(result, np.array([1000, 20000, 400000]))
+    expected = np.log(np.array([1000, 20000, 400000]))
+    assert np.allclose(result, expected)
 
 
 def test_get_cv_ixs():
@@ -59,7 +62,8 @@ def test_get_cv_ixs():
 
 
 def test_evaluate_preds():
-    preds = np.array([1000, 20000, 400000])
-    result = ev.evaluate_preds(preds, df)
+    preds = np.log(np.array([1000, 20000, 400000]))
+    targets = preds[:]
+    result = ev.evaluate_preds(preds, targets)
     for metric in result:
         assert result[metric] == 0

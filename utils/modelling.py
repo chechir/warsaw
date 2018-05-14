@@ -15,6 +15,7 @@ class CVFitter():
     def fit(self, mm, targets, ixs, **fitting_kwargs):
         assert isinstance(ixs, OrderedDict)
         models = {}
+        preds = {}
         final_preds = np.zeros(len(mm)) * np.nan
         results = {}
         early_stopping = 'early_stopping_rounds' in fitting_kwargs
@@ -30,9 +31,11 @@ class CVFitter():
                         }
             fold_model.fit(mm_train, targets_train, **fitting_kwargs)
             fold_preds = fold_model.predict(mm_val)
-            final_preds[val_ix] = fold_preds
             models[fold_name] = fold_model
+            preds[fold_name] = fold_preds
+            final_preds[val_ix] = fold_preds
 
         results['combined_preds'] = final_preds
+        results['preds'] = preds
         results['models'] = models
         return results
