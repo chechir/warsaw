@@ -7,10 +7,11 @@ initial idea: evaluate model in CV
 - create test file: tests/test_pipelines.py
 - create test: def test_eval_model()
 
-df = DDF({  # define df as global because we will use it again
+df = DDF({
     'MSZoning': ['FV', 'RH', 'RM'],
     'MiscFeature': [np.nan, 'Gar2', 'Othr'],
-    'MoSold': [2, 5, 9]
+    'MoSold': [2, 5, 9],
+    'SalePrice': [1000, 20000, 400000]
     })
 
 
@@ -23,7 +24,7 @@ def test_eval_model_on_cv(tmpdir):
             extra_model_params=model_params)
     results_df = DDF.from_csv(log_path)
     assert len(results_df) == 1
-    assert np.isclose(results_df['mse'][0], 55918.798270300009)
+    assert np.isclose(results_df['rmse'][0], 0.28874433)
 
 - run tests and it will fail
 - cannot import data, fix it, create load_df and TRAIN_PATH
@@ -38,18 +39,24 @@ def load_df(data_path, nrows=None):
 - create function: eval_model_on_cv
    s: abstraction levels, general steps
 
-def eval_model_on_cv(df, log_file):
+def eval_model_on_cv(df, log_file, extra_model_params={}):
     df = clean_data(df)
     df = add_features(df)
     mm, targets = get_mm(df), get_targets(df)
     ixs = get_cv_ixs(df)
-    model = get_model(n_jobs=10, n_estimators=9999)
+    params = {
+            'learning_rate': 0.01,
+            'n_estimators': 9999,
+            'n_jobs': 10
+            }
+    params.update(extra_model_params)
+    model = get_model(**params)
     fitter = CVFitter(model)
     results = fitter.fit(mm, targets, ixs, early_stopping_rounds=50)
     preds = results['combined_preds']
-    val_ixs = get_val_ixs(ixs)
-    evals = evaluate_losses(preds, df[val_ixs])
-    io.append_csv(log_file)
+    evals = evaluate_preds(preds, targets)
+    utils.io.append_csv(evals, log_file)
+    return evals
 
 
 We need to build a bunch of functions
@@ -133,4 +140,5 @@ def get_cv_ixs(df, split_ratio=0.5):
     return result
 
 
-get_model: here we need to change something
+get_model: This function is very simple. Sometimes I wouldn't write a test for such
+a simple function, but still something can go wrong (forget to put the update, etc)
