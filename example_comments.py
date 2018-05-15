@@ -1,10 +1,11 @@
 import re
+from nltk.corpus import stopwords
 url = 'https://www.kaggle.com/lystdo/lstm-with-word2vec-embeddings'
 
 
 def get_wordlist_from_text(
         text, remove_stopwords=False, stem_words=False):
-    text = convert_words_to_lower(text)
+    text = text.lower()
     if remove_stopwords:
         text = apply_remove_stopwords(text)
     text = clean_text(text)
@@ -13,11 +14,13 @@ def get_wordlist_from_text(
     return text
 
 
-def convert_words_to_lower(text):
-    result = _split_words(text)
-    result = result.lower(result)
+def apply_remove_stopwords(text):
+    stops = set(stopwords.words("english"))
+    result = text.split()
+    result = [word for word in result if word not in stops]
     result = _join_words(result)
-    return result.lower()
+    result = ' '.join(text)
+    return result
 
 
 def clean_text(text):
@@ -37,6 +40,14 @@ def clean_text(text):
     return result
 
 
+def _split_words(text):
+    return [word for word in text]
+
+
+def _join_words(text):
+    return ' '.join(text)
+
+
 def remove_stop_words():
     pass
 
@@ -45,8 +56,6 @@ def apply_stem_words():
     pass
 
 
-def apply_remove_stopwords():
-    pass
 
 
 def _split_words(text):

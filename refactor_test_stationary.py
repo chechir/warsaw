@@ -3,24 +3,28 @@ import pandas as pd
 import statsmodels.api as sm
 
 
-def plot_rolling_statistics(timeseries):
-    stats = _get_rolling_stats(timeseries)
-    stats['logerror'] = timeseries
+def plot_stats(timeseries):
+    stats = _get_stats(timeseries)
     _plot_rolling_stats(stats)
 
 
-def print_dickey_fuller_test(timeseries):
-    raw_result = sm.tsa.adfuller(timeseries['abs_logerror'], autolag='AIC')
+def _get_stats(timeseries, past_days=31):
+    stats = {}
+    stats['rolling_mean'] = pd.rolling_mean(timeseries, window=past_days)
+    stats['rolling_std'] = pd.rolling_std(timeseries, window=past_days)
+    stats['logerror'] = timeseries
+    return stats
+
+
+def show_dickey_fuller_test(timeseries):
+    raw_result = _perform_dickey_fuller_test(timeseries)
     result = _parse_raw_dickey_fuller_results(raw_result)
     print('Results of Dickey-Fuller Test:')
     print result()
 
 
-def _get_rolling_stats(timeseries, past_days=31):
-    stats = {}
-    stats['rolling_mean'] = pd.rolling_mean(timeseries, window=past_days)
-    stats['rolling_std'] = pd.rolling_std(timeseries, window=past_days)
-    return stats
+def _perform_dickey_fuller_test(timeseries):
+    return sm.tsa.adfuller(timeseries['abs_logerror'], autolag='AIC')
 
 
 def _parse_raw_dickey_fuller_results(raw_result):
