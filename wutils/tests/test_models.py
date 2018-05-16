@@ -1,6 +1,6 @@
 from ddf import DDF
 import numpy as np
-from utils.models import LGBRModel
+from wutils.models import LGBRModel
 
 
 def test_LGBRmodel():

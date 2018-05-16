@@ -1,7 +1,7 @@
 from collections import OrderedDict
 import copy
 import numpy as np
-from utils import io
+from wutils import io
 
 
 class CVFitter():

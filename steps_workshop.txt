@@ -1,10 +1,13 @@
-- make repo: housePrice folder, add __init__.py file
-- create folder tests
-
+- make repo: housePrice folder, add __init__.py file   | create folder tests
 initial idea: evaluate model in CV
 
 ######### MAKE A FUNCTIONAL FAILING TEST
-- create test file: tests/test_pipelines.py
+# FIrst, we start by defining what we want to achieve.
+# I see Kaggle like 2 dependant pieces of work:
+    > build a good model, ergo, we need to evaluate a model on cv
+    > Submit predictions to kaggle
+
+- create test file: tests/test_eval_model.py
 - create test: def test_eval_model()
 
 df = DDF({
@@ -13,7 +16,6 @@ df = DDF({
     'MoSold': [2, 5, 9],
     'SalePrice': [1000, 20000, 400000]
     })
-
 
 def test_eval_model_on_cv(tmpdir):
     df = load_df(TRAIN_PATH, nrows=10)
@@ -24,7 +26,7 @@ def test_eval_model_on_cv(tmpdir):
             extra_model_params=model_params)
     results_df = DDF.from_csv(log_path)
     assert len(results_df) == 1
-    assert np.isclose(results_df['rmse'][0], 0.28874433)
+    assert results_df['rmse'][0] > 0
 
 - run tests and it will fail
 - cannot import data, fix it, create load_df and TRAIN_PATH
@@ -35,6 +37,7 @@ def load_df(data_path, nrows=None):
 
 ######### MAKE THE TEST PASS
 
+To make this test pass, we need this function to be created, and return what we expect
 - create file: eval_model.py
 - create function: eval_model_on_cv
    s: abstraction levels, general steps
@@ -44,25 +47,21 @@ def eval_model_on_cv(df, log_file, extra_model_params={}):
     df = add_features(df)
     mm, targets = get_mm(df), get_targets(df)
     ixs = get_cv_ixs(df)
-    params = {
-            'learning_rate': 0.01,
-            'n_estimators': 9999,
-            'n_jobs': 10
-            }
-    params.update(extra_model_params)
-    model = get_model(**params)
+    model = get_model(**extra_model_params)
     fitter = CVFitter(model)
     results = fitter.fit(mm, targets, ixs, early_stopping_rounds=50)
     preds = results['combined_preds']
     evals = evaluate_preds(preds, targets)
-    utils.io.append_csv(evals, log_file)
+    wutils.io.append_csv(evals, log_file)
     return evals
 
 
-We need to build a bunch of functions
+Then we have our pipeline built, roughly at one high level of abstraction, and now we need to
+start building the individual functions. We can build some of these functions together. The idea
+is to make work the entire pipeline with few elements. Afterwards, we can try to improve
 
-####### Write a failing test (unit test)
-test_clean_data()
+
+####### Write a failing test (unit test)  clean_data
 def test_clean_data():
     result_df = ev.clean_data(df)
     assert result_df['MSZoning'].dtype == float
@@ -71,11 +70,11 @@ def test_clean_data():
 
 ####### Make the test pass               clean_data
 def clean_data(df):
-    str_columns = utils.np.get_str_columns(df)
+    str_columns = wutils.np.get_str_columns(df)
     for col in str_columns:
-        df[col] = utils.features.categorical_to_numeric(df, col)
-    for col in df.columns:
-        df[col] = utils.np.fillna(df[col], -99)
+        df[col] = wutils.features.categorical_to_numeric(df, col)
+    for col in set(df.columns) - set([target_name]):
+        df[col] = wutils.np.fillna(df[col], -99)
     return df
 
 
@@ -97,9 +96,10 @@ def test_get_mm():
     assert 'SalesPrice' not in result_df.columns
 
 
-def test_get_targets():
-    result = ev.get_targets(df)
-    assert np.allclose(result, np.array([1000, 20000, 400000]))
+def get_mm(df):
+    columns_to_drop = [target_name, 'Id', 'LotAreaCut']
+    mm_cols = [col for col in df.columns if col not in columns_to_drop]
+    return df.colslice(mm_cols)
 
 
 ####### Make the test pass
@@ -111,7 +111,7 @@ def get_mm(df):
 
 
 def get_targets(df):
-    return df[target_name]
+    return np.log(df[target_name])
 
 
 ####### Write a failing test (unit test)  add_features
@@ -140,5 +140,32 @@ def get_cv_ixs(df, split_ratio=0.5):
     return result
 
 
+####### Function too simple to have a test?
 get_model: This function is very simple. Sometimes I wouldn't write a test for such
 a simple function, but still something can go wrong (forget to put the update, etc)
+
+def get_model(**kwargs):
+    params = {
+            'n_estimators': 9999,
+            'max_depth': 20
+            }
+    params.update(kwargs)
+    model = wutils.models.LGBRModel(params)
+    return model
+
+
+####### Write a failing test (unit test)  evaluate_preds
+def test_evaluate_preds():
+    preds = np.log(np.array([1000, 20000, 400000]))
+    targets = preds[:]
+    result = ev.evaluate_preds(preds, targets)
+    for metric in result:
+        assert result[metric] == 0
+
+
+def evaluate_preds(preds, targets):
+    evals = {
+            'rmse': mean_squared_error(targets, preds) ** (1./2),
+            'mae': mean_absolute_error(targets, preds)
+            }
+    return evals

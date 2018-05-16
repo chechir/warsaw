@@ -1,4 +1,4 @@
-from utils import np as utils_np
+from wutils import np as utils_np
 import numpy as np
 
 from ddf import DDF

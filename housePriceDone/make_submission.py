@@ -2,11 +2,11 @@ from collections import OrderedDict
 
 import numpy as np
 
-from utils.ddf import DDF
 from housePriceDone.data import TRAIN_PATH, TEST_PATH, load_df
 from housePriceDone import eval_model as ev
-from utils.modelling import CVFitter
-import utils
+from wutils.modelling import CVFitter
+from wutils.ddf import DDF
+import wutils
 
 
 def make_submission_file(train_df, test_df, sub_path, extra_model_params={}):
@@ -47,5 +47,5 @@ def generate_sub_file(preds, sub_id, sub_file_path):
 if __name__ == '__main__':
     train_df = load_df(TRAIN_PATH)
     test_df = load_df(TEST_PATH)
-    sub_path = utils.paths.dropbox() + '/sub_lgb.csv'
+    sub_path = wutils.paths.dropbox() + '/sub_lgb.csv'
     make_submission_file(train_df, test_df, sub_path)

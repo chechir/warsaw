@@ -593,25 +593,3 @@ def test_json_conversion_strings_with_leading_zeros():
     newdf = DDF.from_json(js)
     newdf = newdf.colslice(df)
     assert newdf.equals(df)
-
-
-def test_get_odds():
-    win_odds = np.array([1, 2, 3])
-    place_odds = np.array([3, 2, 1])
-    df = DDF({
-        'win_odds': win_odds,
-        'place_odds': place_odds
-        })
-    odds = df.get_odds('win')
-    assert np.array_equal(odds, win_odds)
-
-
-def test_get_flags():
-    win_flags = np.array([1, 0, 0])
-    place_flags = np.array([1, 1, 0])
-    df = DDF({
-        'win_flag': win_flags,
-        'place_flag': place_flags
-        })
-    odds = df.get_flags('win')
-    assert np.array_equal(odds, win_flags)

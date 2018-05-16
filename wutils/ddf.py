@@ -7,7 +7,7 @@ import warnings
 import numpy as np
 import pandas as pd
 
-from utils import np as utilsnp
+from wutils import np as utilsnp
 
 default_config = {
             'repr': {
