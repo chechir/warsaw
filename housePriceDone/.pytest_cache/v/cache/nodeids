@@ -1,0 +1,13 @@
+[
+  "tests/test_eval_model.py::test_eval_model_on_cv", 
+  "tests/test_eval_model.py::test_clean_data", 
+  "tests/test_eval_model.py::test_add_features", 
+  "tests/test_eval_model.py::test_get_mm", 
+  "tests/test_eval_model.py::test_get_targets", 
+  "tests/test_eval_model.py::test_get_cv_ixs", 
+  "tests/test_eval_model.py::test_evaluate_preds", 
+  "tests/test_make_submission.py::test_make_submission_file", 
+  "tests/test_make_submission.py::test_append_dfs", 
+  "tests/test_make_submission.py::test_get_lb_ixs", 
+  "tests/test_make_submission.py::test_generate_sub_file"
+]

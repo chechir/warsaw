@@ -1,0 +1,13 @@
+[
+  "housePriceDone/tests/test_eval_model.py::test_eval_model_on_cv", 
+  "housePriceDone/tests/test_eval_model.py::test_clean_data", 
+  "housePriceDone/tests/test_eval_model.py::test_add_features", 
+  "housePriceDone/tests/test_eval_model.py::test_get_mm", 
+  "housePriceDone/tests/test_eval_model.py::test_get_targets", 
+  "housePriceDone/tests/test_eval_model.py::test_get_cv_ixs", 
+  "housePriceDone/tests/test_eval_model.py::test_evaluate_preds", 
+  "housePriceDone/tests/test_make_submission.py::test_make_submission_file", 
+  "housePriceDone/tests/test_make_submission.py::test_append_dfs", 
+  "housePriceDone/tests/test_make_submission.py::test_get_lb_ixs", 
+  "housePriceDone/tests/test_make_submission.py::test_generate_sub_file"
+]

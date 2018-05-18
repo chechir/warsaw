@@ -5,13 +5,13 @@ url = 'https://www.kaggle.com/lystdo/lstm-with-word2vec-embeddings'
 
 def get_wordlist_from_text(
         text, remove_stopwords=False, stem_words=False):
-    text = text.lower()
+    result = text.lower()
     if remove_stopwords:
-        text = apply_remove_stopwords(text)
-    text = clean_text(text)
+        result = apply_remove_stopwords(result)
+    result = clean_text(result)
     if stem_words:
-        text = apply_stem_words(text)
-    return text
+        result = apply_stem_words(result)
+    return result
 
 
 def apply_remove_stopwords(text):
